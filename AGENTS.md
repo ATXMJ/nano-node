@@ -4,56 +4,53 @@
 - System dependencies: `build-essential`, `g++`, `wget`, `python3`, `zlib1g-dev`, `cmake`, `git`
 - Qt5 dependencies are only required if building GUI (`-DNANO_GUI=ON`).
 
-## ⚡ Just Quick Commands
-If `just` is installed, you can use these shortcuts:
-- `just submodules` : Initialize git submodules
-- `just build`      : Build standard debug node
-- `just test`       : Build and run core unit tests
-- `just test-rpc`   : Build and run RPC test suite
-- `just check-fmt`  : Check formatting without modifying files
-- `just fmt`        : Format C++ and CMake sources
+## 🛠️ Justfile & Command Execution Protocol
 
-## 🔄 Submodule Initialization
-Submodules must be initialized before the first build:
+### ⚠️ Mandatory `just` Command Execution Policy
+1. **Strict `just` Delegation**: Always perform building, testing, linting, formatting, and daemon execution via `just` commands. Never directly invoke raw terminal commands (e.g., `cmake --build`, `./build/core_test`, `./format-do.sh`, `git submodule update`) when an existing `just` recipe covers the action.
+2. **Dynamic Recipe Creation**: If a task requires executing a command that does not yet exist in `nano-node/Justfile`, add a generalized, reusable recipe to `nano-node/Justfile` *first*, then execute it via `just`.
+
+## ⚡ Available `just` Command Directives
+
+### 🔄 Submodule Initialization
+Initialize submodules prior to first build:
 ```bash
-git submodule update --init --recursive
+just submodules
 ```
 
-## 🏗️ Build Commands
-
-### Standard Debug Build
-```bash
-mkdir -p build && cd build
-cmake -DCMAKE_BUILD_TYPE=Debug -DPORTABLE=ON -DACTIVE_NETWORK=nano_live_network -DNANO_TEST=OFF -DNANO_GUI=OFF ..
-cmake --build . --parallel $(nproc)
-```
-
-### CI Build Script
-```bash
-# Build node daemon
-./ci/build.sh node
-
-# Build test binaries
-NANO_TEST=ON NANO_NETWORK=dev NANO_GUI=OFF ./ci/build.sh core_test
-```
-
-## 🧪 Testing Protocol
-Run compiled test binaries from the `build/` output directory:
-```bash
-# Run core test suite
-./build/core_test
-
-# Run RPC test suite
-./build/rpc_test
-```
-
-## 🧹 Formatting & Code Quality
-- Check formatting without modifying files:
+### 🏗️ Building
+- **Standard Debug Node Build:**
   ```bash
-  ./format-check.sh
+  just build
   ```
-- Format C++ and CMake sources:
+- **Build Node with Test Executables Enabled (`core_test`, `rpc_test`):**
   ```bash
-  ./format-do.sh
+  just build-tests
+  ```
+- **Run CI Build Pipeline:**
+  ```bash
+  just ci-build node
+  just ci-build core_test
+  ```
+
+### 🧪 Testing
+- **Run Core GoogleTest Suite:**
+  ```bash
+  just test
+  ```
+- **Run RPC Test Suite:**
+  ```bash
+  just test-rpc
+  ```
+
+### 🧹 Formatting & Code Quality
+- **Verify Formatting (Read-Only):**
+  ```bash
+  just check-fmt
+  ```
+- **Apply Auto-Formatting:**
+  ```bash
+  just fmt
   ```
   *(Requires `clang-format` v17 and `cmake-format` v0.6.13)*
+

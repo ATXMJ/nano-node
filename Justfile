@@ -33,3 +33,8 @@ check-fmt:
 # Apply code formatting (requires clang-format 17 & cmake-format 0.6.13)
 fmt:
     ./format-do.sh
+
+# Run CI build script for a specific target (e.g. `just ci-build node` or `just ci-build core_test`)
+ci-build target="node":
+    ./ci/build.sh {{target}}
+
