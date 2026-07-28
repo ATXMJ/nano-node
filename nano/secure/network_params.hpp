@@ -23,10 +23,12 @@ public:
 	nano::account nano_beta_account;
 	nano::account nano_live_account;
 	nano::account nano_test_account;
+	nano::account nano_privacy_account;
 	std::shared_ptr<nano::block> nano_dev_genesis;
 	std::shared_ptr<nano::block> nano_beta_genesis;
 	std::shared_ptr<nano::block> nano_live_genesis;
 	std::shared_ptr<nano::block> nano_test_genesis;
+	std::shared_ptr<nano::block> nano_privacy_genesis;
 	std::shared_ptr<nano::block> genesis;
 	nano::uint128_t genesis_amount;
 	nano::account burn_account;
@@ -117,6 +119,14 @@ public:
 };
 
 namespace dev
+{
+	extern nano::keypair genesis_key;
+	extern nano::network_params network_params;
+	extern nano::ledger_constants & constants;
+	extern std::shared_ptr<nano::block> & genesis;
+}
+
+namespace privacy
 {
 	extern nano::keypair genesis_key;
 	extern nano::network_params network_params;

@@ -114,6 +114,29 @@ public:
 			reachout_preconfigured_period = std::chrono::seconds (1);
 			reachout_preconfigured_warmup_period = std::chrono::seconds (1);
 		}
+		else if (is_privacy_network ())
+		{
+			aec_loop_interval = 20ms;
+			cleanup_period = std::chrono::seconds (1);
+			merge_period = std::chrono::milliseconds (10);
+			keepalive_period = std::chrono::seconds (1);
+			idle_timeout = cleanup_period * 15;
+			peer_dump_interval = std::chrono::seconds (1);
+			vote_broadcast_interval = 500ms;
+			block_broadcast_interval = 500ms;
+			telemetry_request_cooldown = 500ms;
+			telemetry_cache_cutoff = 2000ms;
+			telemetry_request_interval = 500ms;
+			telemetry_broadcast_interval = 500ms;
+			rep_crawler_normal_interval = 500ms;
+			rep_crawler_warmup_interval = 500ms;
+			reachout_preconfigured_period = std::chrono::seconds (1);
+			reachout_preconfigured_warmup_period = std::chrono::seconds (1);
+			default_node_port = 7077;
+			default_rpc_port = 7078;
+			default_websocket_port = 7079;
+			default_ipc_port = 7080;
+		}
 	}
 
 	/** The network this param object represents. This may differ from the global active network; this is needed for certain --debug... commands */
@@ -187,6 +210,8 @@ public:
 				return "dev";
 			case nano::network_type::nano_test_network:
 				return "test";
+			case nano::network_type::nano_privacy_network:
+				return "privacy";
 			case network_type::invalid:
 				break;
 		}
@@ -208,6 +233,10 @@ public:
 	bool is_test_network () const
 	{
 		return current_network == nano::network_type::nano_test_network;
+	}
+	bool is_privacy_network () const
+	{
+		return current_network == nano::network_type::nano_privacy_network;
 	}
 
 	/** Current protocol version */

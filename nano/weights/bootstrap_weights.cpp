@@ -23,6 +23,7 @@ nano::bootstrap_weights nano::get_bootstrap_weights (nano::network_type type)
 			break;
 		case nano::network_type::nano_dev_network:
 		case nano::network_type::nano_test_network:
+		case nano::network_type::nano_privacy_network:
 		case nano::network_type::invalid:
 			return {};
 	}

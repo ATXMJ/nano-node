@@ -15,6 +15,8 @@ namespace
 {
 char const * dev_private_key_data = "34F0A37AAD20F4A260F0A5B3CB3D7FB50673212263E58A380BC10474BB039CE4";
 char const * dev_public_key_data = "B0311EA55708D6A53C75CDBF88300259C6D018522FE3D4D0A242E431F9E8B6D0"; // xrb_3e3j5tkog48pnny9dmfzj1r16pg8t1e76dz5tmac6iq689wyjfpiij4txtdo
+char const * privacy_private_key_data = "34F0A37AAD20F4A260F0A5B3CB3D7FB50673212263E58A380BC10474BB039CE4";
+char const * privacy_public_key_data = "B0311EA55708D6A53C75CDBF88300259C6D018522FE3D4D0A242E431F9E8B6D0";
 char const * beta_public_key_data = "259A438A8F9F9226130C84D902C237AF3E57C0981C7D709C288046B110D8C8AC"; // nano_1betagoxpxwykx4kw86dnhosc8t3s7ix8eeentwkcg1hbpez1outjrcyg4n1
 char const * live_public_key_data = "E89208DD038FBB269987689621D52292AE9C35941A7484756ECCED92A65093BA"; // xrb_3t6k35gi95xu6tergt6p69ck76ogmitsa8mnijtpxm9fkcm736xtoncuohr3
 std::string const test_public_key_data = nano::env::get ("NANO_TEST_GENESIS_PUB").value_or ("45C6FF9D1706D61F0821327752671BDA9F9ED2DA40326B01935AB566FB9E08ED"); // nano_1jg8zygjg3pp5w644emqcbmjqpnzmubfni3kfe1s8pooeuxsw49fdq1mco9j
@@ -27,6 +29,8 @@ char const * dev_genesis_data = R"%%%({
 	"work": "7b42a00ee91d5810",
 	"signature": "ECDA914373A2F0CA1296475BAEE40500A7F0A7AD72A5A80C81D7FAB7F6C802B2CC7DB50F5DD0FB25B2EF11761FA7344A158DD5A700B21BD47DE5BD0F63153A02"
     })%%%";
+
+char const * privacy_genesis_data = dev_genesis_data;
 
 char const * beta_genesis_data = R"%%%({
 	"type": "open",
@@ -74,6 +78,15 @@ nano::ledger_constants & nano::dev::constants{ nano::dev::network_params.ledger 
 std::shared_ptr<nano::block> & nano::dev::genesis = nano::dev::constants.genesis;
 
 /*
+ * nano::privacy constants
+ */
+
+nano::keypair nano::privacy::genesis_key{ privacy_private_key_data };
+nano::network_params nano::privacy::network_params{ nano::network_type::nano_privacy_network };
+nano::ledger_constants & nano::privacy::constants{ nano::privacy::network_params.ledger };
+std::shared_ptr<nano::block> & nano::privacy::genesis = nano::privacy::constants.genesis;
+
+/*
  *
  */
 
@@ -86,6 +99,7 @@ nano::work_thresholds nano::work_thresholds_for_network (nano::network_type netw
 		case nano::network_type::nano_beta_network:
 			return nano::work_thresholds::publish_beta;
 		case nano::network_type::nano_dev_network:
+		case nano::network_type::nano_privacy_network:
 			return nano::work_thresholds::publish_dev;
 		case nano::network_type::nano_test_network:
 			return nano::work_thresholds::publish_test;
@@ -105,7 +119,7 @@ nano::network_params::network_params (nano::network_type network_type) :
 {
 	unsigned constexpr kdf_full_work = 64 * 1024;
 	unsigned constexpr kdf_dev_work = 8;
-	kdf_work = network.is_dev_network () ? kdf_dev_work : kdf_full_work;
+	kdf_work = (network.is_dev_network () || network.is_privacy_network ()) ? kdf_dev_work : kdf_full_work;
 }
 
 /*
@@ -117,10 +131,12 @@ nano::ledger_constants::ledger_constants (nano::network_type network_type) :
 	nano_beta_account{ beta_public_key_data },
 	nano_live_account{ live_public_key_data },
 	nano_test_account{ test_public_key_data },
+	nano_privacy_account{ privacy_public_key_data },
 	nano_dev_genesis{ parse_block_from_genesis_data (dev_genesis_data) },
 	nano_beta_genesis{ parse_block_from_genesis_data (beta_genesis_data) },
 	nano_live_genesis{ parse_block_from_genesis_data (live_genesis_data) },
 	nano_test_genesis{ parse_block_from_genesis_data (test_genesis_data) },
+	nano_privacy_genesis{ parse_block_from_genesis_data (privacy_genesis_data) },
 	genesis_amount{ std::numeric_limits<nano::uint128_t>::max () },
 	burn_account{ nano::account{ 0 } }
 {
@@ -172,6 +188,18 @@ nano::ledger_constants::ledger_constants (nano::network_type network_type) :
 	/* source_epoch */ nano::epoch::epoch_0,
 	/* topo_height */ 1 });
 
+	nano_privacy_genesis->sideband_set (nano::block_sideband{
+	/* account */ nano_privacy_genesis->account_field ().value (),
+	/* balance (amount) */ nano::amount{ std::numeric_limits<nano::uint128_t>::max () },
+	/* height */ uint64_t{ 1 },
+	/* local_timestamp */ 0,
+	/* epoch */ nano::epoch::epoch_0,
+	/* is_send */ false,
+	/* is_receive */ false,
+	/* is_epoch */ false,
+	/* source_epoch */ nano::epoch::epoch_0,
+	/* topo_height */ 1 });
+
 	nano::account epoch_v2_signer;
 	switch (network_type)
 	{
@@ -179,6 +207,12 @@ nano::ledger_constants::ledger_constants (nano::network_type network_type) :
 		{
 			genesis = nano_dev_genesis;
 			epoch_v2_signer = nano::dev::genesis_key.pub;
+		}
+		break;
+		case nano::network_type::nano_privacy_network:
+		{
+			genesis = nano_privacy_genesis;
+			epoch_v2_signer = nano::privacy::genesis_key.pub;
 		}
 		break;
 		case nano::network_type::nano_live_network:
@@ -238,9 +272,9 @@ nano::hardened_constants::hardened_constants () :
 nano::node_constants::node_constants (nano::network_constants const & network_constants)
 {
 	backup_interval = std::chrono::minutes (5);
-	search_pending_interval = network_constants.is_dev_network () ? std::chrono::seconds (1) : std::chrono::seconds (5 * 60);
+	search_pending_interval = (network_constants.is_dev_network () || network_constants.is_privacy_network ()) ? std::chrono::seconds (1) : std::chrono::seconds (5 * 60);
 	unchecked_cleaning_interval = std::chrono::minutes (30);
-	weight_interval = network_constants.is_dev_network () ? std::chrono::seconds (1) : std::chrono::minutes (5);
+	weight_interval = (network_constants.is_dev_network () || network_constants.is_privacy_network ()) ? std::chrono::seconds (1) : std::chrono::minutes (5);
 	weight_cutoff = (network_constants.is_live_network () || network_constants.is_test_network ()) ? std::chrono::weeks (2) : std::chrono::days (1);
 }
 
@@ -249,8 +283,8 @@ nano::node_constants::node_constants (nano::network_constants const & network_co
  */
 
 nano::voting_constants::voting_constants (nano::network_constants const & network_constants) :
-	max_cache{ network_constants.is_dev_network () ? 256U : 128U * 1024 },
-	delay{ network_constants.is_dev_network () ? 1 : 15 }
+	max_cache{ (network_constants.is_dev_network () || network_constants.is_privacy_network ()) ? 256U : 128U * 1024 },
+	delay{ (network_constants.is_dev_network () || network_constants.is_privacy_network ()) ? 1 : 15 }
 {
 }
 
@@ -270,11 +304,12 @@ nano::portmapping_constants::portmapping_constants (nano::network_constants cons
 
 nano::bootstrap_constants::bootstrap_constants (nano::network_constants const & network_constants)
 {
-	lazy_max_pull_blocks = network_constants.is_dev_network () ? 2 : 512;
-	lazy_min_pull_blocks = network_constants.is_dev_network () ? 1 : 32;
-	frontier_retry_limit = network_constants.is_dev_network () ? 2 : 16;
-	lazy_retry_limit = network_constants.is_dev_network () ? 2 : frontier_retry_limit * 4;
-	lazy_destinations_retry_limit = network_constants.is_dev_network () ? 1 : frontier_retry_limit / 4;
-	gap_cache_bootstrap_start_interval = network_constants.is_dev_network () ? std::chrono::milliseconds (5) : std::chrono::milliseconds (30 * 1000);
-	default_frontiers_age_seconds = network_constants.is_dev_network () ? 1 : 24 * 60 * 60; // 1 second for dev network, 24 hours for live/beta
+	bool is_dev = network_constants.is_dev_network () || network_constants.is_privacy_network ();
+	lazy_max_pull_blocks = is_dev ? 2 : 512;
+	lazy_min_pull_blocks = is_dev ? 1 : 32;
+	frontier_retry_limit = is_dev ? 2 : 16;
+	lazy_retry_limit = is_dev ? 2 : frontier_retry_limit * 4;
+	lazy_destinations_retry_limit = is_dev ? 1 : frontier_retry_limit / 4;
+	gap_cache_bootstrap_start_interval = is_dev ? std::chrono::milliseconds (5) : std::chrono::milliseconds (30 * 1000);
+	default_frontiers_age_seconds = is_dev ? 1 : 24 * 60 * 60; // 1 second for dev network, 24 hours for live/beta
 }

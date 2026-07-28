@@ -104,6 +104,7 @@ nano::node_config::node_config (nano::network_params const & network_params) :
 	switch (network_params.network.network ())
 	{
 		case nano::network_type::nano_dev_network:
+		case nano::network_type::nano_privacy_network:
 			enable_voting = true;
 			preconfigured_representatives.push_back (network_params.ledger.genesis->account ());
 			break;

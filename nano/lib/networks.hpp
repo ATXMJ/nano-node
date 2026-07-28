@@ -21,6 +21,8 @@ enum class network_type : uint16_t
 	nano_live_network = 0x5243, // 'R', 'C'
 	// Normal work parameters, secret test genesis key, test IP ports
 	nano_test_network = 0x5258, // 'R', 'X'
+	// Privacy network, isolated test target, custom ports
+	nano_privacy_network = 0x5250, // 'R', 'P'
 };
 
 std::string_view to_string (nano::network_type);

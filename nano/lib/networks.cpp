@@ -37,6 +37,8 @@ std::string_view to_string (nano::network_type network)
 			return "live";
 		case nano::network_type::nano_test_network:
 			return "test";
+		case nano::network_type::nano_privacy_network:
+			return "privacy";
 		case nano::network_type::invalid:
 			return "invalid";
 	}
@@ -62,6 +64,10 @@ std::optional<nano::network_type> parse_network (std::string network_name)
 	if (network_name == "test")
 	{
 		return nano::network_type::nano_test_network;
+	}
+	if (network_name == "privacy" || network_name == "nano_privacy_network")
+	{
+		return nano::network_type::nano_privacy_network;
 	}
 	return std::nullopt;
 }

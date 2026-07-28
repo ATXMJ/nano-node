@@ -162,7 +162,7 @@ set(ACTIVE_NETWORK
     CACHE STRING "Selects which network parameters are used")
 set_property(
   CACHE ACTIVE_NETWORK PROPERTY STRINGS nano_dev_network nano_beta_network
-                                nano_live_network nano_test_network)
+                                nano_live_network nano_test_network nano_privacy_network)
 set(CPACK_PACKAGE_NAME
     "nano-node"
     CACHE STRING "" FORCE)
@@ -200,6 +200,19 @@ elseif("${ACTIVE_NETWORK}" MATCHES "nano_test_network")
       CACHE STRING "" FORCE)
   set(NANO_SERVICE "nanocurrency-test.service")
   set(NANO_PREFIX "Test")
+elseif("${ACTIVE_NETWORK}" MATCHES "nano_privacy_network")
+  project("nano-node-privacy")
+  set(CPACK_PACKAGE_NAME
+      "nano-node-privacy"
+      CACHE STRING "" FORCE)
+  set(CPACK_NSIS_PACKAGE_NAME
+      "Nano-Privacy"
+      CACHE STRING "" FORCE)
+  set(CPACK_PACKAGE_INSTALL_DIRECTORY
+      "nanocurrency-privacy"
+      CACHE STRING "" FORCE)
+  set(NANO_SERVICE "nanocurrency-privacy.service")
+  set(NANO_PREFIX "Privacy")
 endif()
 set(NANO_OSX_PACKAGE_NAME
     ${CPACK_NSIS_PACKAGE_NAME}
