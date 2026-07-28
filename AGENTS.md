@@ -10,47 +10,15 @@
 1. **Strict `just` Delegation**: Always perform building, testing, linting, formatting, and daemon execution via `just` commands. Never directly invoke raw terminal commands (e.g., `cmake --build`, `./build/core_test`, `./format-do.sh`, `git submodule update`) when an existing `just` recipe covers the action.
 2. **Dynamic Recipe Creation**: If a task requires executing a command that does not yet exist in `nano-node/Justfile`, add a generalized, reusable recipe to `nano-node/Justfile` *first*, then execute it via `just`.
 
-## ⚡ Available `just` Command Directives
+## ⚡ Command Directives & Examples
 
-### 🔄 Submodule Initialization
-Initialize submodules prior to first build:
-```bash
-just submodules
-```
+Run `just --list` (or inspect [Justfile](file:///home/mj/dev/nano-privacy/nano-node/Justfile)) to see all available targets.
 
-### 🏗️ Building
-- **Standard Debug Node Build:**
-  ```bash
-  just build
-  ```
-- **Build Node with Test Executables Enabled (`core_test`, `rpc_test`):**
-  ```bash
-  just build-tests
-  ```
-- **Run CI Build Pipeline:**
-  ```bash
-  just ci-build node
-  just ci-build core_test
-  ```
-
-### 🧪 Testing
-- **Run Core GoogleTest Suite:**
-  ```bash
-  just test
-  ```
-- **Run RPC Test Suite:**
-  ```bash
-  just test-rpc
-  ```
-
-### 🧹 Formatting & Code Quality
-- **Verify Formatting (Read-Only):**
-  ```bash
-  just check-fmt
-  ```
-- **Apply Auto-Formatting:**
-  ```bash
-  just fmt
-  ```
-  *(Requires `clang-format` v17 and `cmake-format` v0.6.13)*
+### Common Usage Examples:
+- **Submodules & Build:** `just submodules` then `just build` or `just build-tests`
+- **Unit / Module Testing:** `just test "block_store.*"`
+- **RPC Integration Testing:** `just test-rpc "rpc.account_balance*"`
+- **Multi-Node System Testing:** `just test-system`
+- **Consensus & Live Election Simulation:** `just test-consensus "*vote*"`
+- **Formatting:** `just check-fmt` / `just fmt`
 
