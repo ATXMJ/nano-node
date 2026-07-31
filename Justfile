@@ -13,10 +13,10 @@ build jobs=num_cpus():
     cmake --build build --parallel {{jobs}}
 
 # Build node with test binaries enabled (`core_test`, `rpc_test`)
-build-tests jobs=num_cpus():
+build-tests target="core_test rpc_test" jobs="4":
     mkdir -p build
     cd build && cmake -DCMAKE_BUILD_TYPE=Debug -DPORTABLE=ON -DACTIVE_NETWORK=nano_dev_network -DNANO_TEST=ON -DNANO_GUI=OFF ..
-    cmake --build build --parallel {{jobs}}
+    cmake --build build --target {{target}} --parallel {{jobs}}
 
 # Run core GoogleTest suite with optional filter (e.g. `just test` or `just test "block_store.*"`)
 test filter="": build-tests
@@ -30,9 +30,9 @@ test-rpc filter="": build-tests
 test-system filter="*": build-tests
     ./build/core_test --gtest_filter=system.{{filter}}
 
-# Run live election & consensus simulation tests (e.g. `just test-consensus` or `just test-consensus "*vote*"`)
-test-consensus filter="*": build-tests
-    ./build/core_test --gtest_filter=node.election*{{filter}}
+# Run live election & consensus simulation tests (e.g. `just test-consensus` or `just test-consensus "active_elections.*"`)
+test-consensus filter="*election*:*vote*:*rep*": build-tests
+    ./build/core_test --gtest_filter={{filter}}
 
 # Check code formatting without modifying files (requires clang-format 17 & cmake-format 0.6.13)
 check-fmt:

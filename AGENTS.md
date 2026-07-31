@@ -12,6 +12,8 @@
 
 ## ⚡ Command Directives & Examples
 
+For full architecture details, test harness patterns, and debugging options, see [TESTING.md](file:///home/mj/dev/nano-privacy/nano-node/TESTING.md).
+
 Run `just --list` (or inspect [Justfile](file:///home/mj/dev/nano-privacy/nano-node/Justfile)) to see all available targets.
 
 ### Common Usage Examples:
